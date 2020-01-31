@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const program = require('commander')
+
+program.version(require('../package.json').version)
+    .command('init', 'generate staic blog system')
+    
+program.parse(process.argv);

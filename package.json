@@ -1,0 +1,31 @@
+{
+  "name": "zuo-blog",
+  "version": "0.1.0",
+  "description": "a staic blog system like hexo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zuoxiaobai/zuo-blog.git"
+  },
+  "keywords": [
+    "zuo-blog",
+    "static",
+    "blog"
+  ],
+  "bin": {
+    "zuoblog": "./bin/zuoblog"
+  },
+  "author": "guoqzuo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zuoxiaobai/zuo-blog/issues"
+  },
+  "homepage": "https://github.com/zuoxiaobai/zuo-blog#readme",
+  "dependencies": {
+    "commander": "^4.1.0",
+    "marked": "^0.8.0"
+  }
+}

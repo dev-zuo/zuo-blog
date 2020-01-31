@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+
+// 执行zuoblog init时会先执行 zuoblog 通过commander可以自动再执行当前文件
+// console.log('this is zuoblog init')
+
+// 读取当前目录的src目录，notes目录，开始转换
+const ZUOBlog = require('../vendor/ZUOBlog')
+const zuoblog = new ZUOBlog()
+
+// 最开始zuoblog调用一个函数就可以直接生成静态文件，但考虑到 主题 可扩展性，
+// 改为两步来操作：1.先将元数据准备好，根据 主题 渲染元数据
+
+// 1.获取元数据
+let notesData = zuoblog.getNotesData()
+// let {category, fileData} = notesData
+
+// 2.根据基础元数据，生成静态博客系统
+let Draft
+
+// 如果有指定 主题，根据主题生成blog
+// 待扩展
+
+// 使用默认主题
+Draft = require('../vendor/draft/DefaultDraft')
+const draft = new Draft()
+draft.init(notesData) // 根据默认主题生成静态博客系统
+
+
