@@ -1,5 +1,5 @@
 
-const FSExtend = require('./lib/FSExtend')
+const FSExtend = require('./utils/FSExtend')
 const fs = require('fs')
 const marked = require('marked')
 
@@ -7,9 +7,11 @@ class ZUOBlog {
 
   constructor() {
     this.notesPath = './src/notes' // notes目录 
+    this.configPath = './src/_config.json'
     this.count = 0 // md文件数量
     this.category = {} // 分类信息
     this.fileData = [] // 处理后的文章数据，每条数据包含fileStr, htmlStr, outline, config
+    this.config = {} // 配置文件
   }
 
   // 获取元数据
@@ -26,8 +28,10 @@ class ZUOBlog {
       // console.log(JSON.stringify(this.category, null, 2))
       // console.log(this.count)
 
-      let {category, fileData, count} = this
-      return {category, fileData, count}
+      this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
+      let {category, fileData, count, config} = this
+      console.log('第一步: 基础数据生成成功 [OK]')
+      return {category, fileData, count, config}
     } catch(e) {
       console.error(e)
       return {}
@@ -63,7 +67,7 @@ class ZUOBlog {
 
         // 如果配置文件存在
         if (fs.existsSync(monthCfgPath)) {  
-          // if (year !== '2019') return  测试单个文件用
+          // if (year !== '2019') return  // 测试单个文件用
           // 根据配置文件遍历md文件
           JSON.parse(fs.readFileSync(monthCfgPath)).forEach(article => { 
             const articlePath = `${monthPath}/${article.source}` // './src/notes/2019/1/xxx.md'
