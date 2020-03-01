@@ -1,5 +1,11 @@
 # zuo-blog
-基于Node.js的轻量级静态博客生成框架，类似于hexo
+> 基于Node.js的轻量级静态博客生成框架，类似于hexo
+
+![version-v0.2.0](https://img.shields.io/badge/version-v0.2.0-yellow.svg) ![build-passing](https://img.shields.io/badge/build-passing-green.svg) ![license-MIT](https://img.shields.io/badge/license-MIT-green.svg) 
+
+npm package
+
+[![NPM](https://nodei.co/npm/zuo-blog.png)](https://npmjs.org/package/zuo-blog)
 
 ## 安装
 ```bash
@@ -52,3 +58,8 @@ github地址：https://github.com/zuoxiaobai/zuo11.com
   - F 修复 v0.1.0 右侧菜单高度问题
   - O 优化 将通用js放到一个js里引入
 - v0.1.0 初步完成基本功能
+
+1. A 新增 用户可以自定义全局的global.css以及全局的global.js
+2. F 修复 v0.1.0 分类页面笔记未按时间排序的问题，修复右侧大纲没有当前分类文章总数的问题
+3. f 修复 v0.1.0 右侧菜单高度问题
+4. O 优化 将通用js放到一个js里引入
