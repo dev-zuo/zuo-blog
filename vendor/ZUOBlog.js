@@ -8,6 +8,8 @@ class ZUOBlog {
   constructor() {
     this.notesPath = './src/notes' // notes目录 
     this.configPath = './src/_config.json'
+    this.globalJsPath = './src/global.js'
+    this.globalCssPath = './src/global.css'
     this.count = 0 // md文件数量
     this.category = {} // 分类信息
     this.fileData = [] // 处理后的文章数据，每条数据包含fileStr, htmlStr, outline, config
@@ -28,7 +30,17 @@ class ZUOBlog {
       // console.log(JSON.stringify(this.category, null, 2))
       // console.log(this.count)
 
+      // 判断src目录下是否有global.js，如果有，在config里加入标记，后面生成页面时有标记就
+      let isGlobalJsFileExists = fs.existsSync(this.globalJsPath)
+      let isGlobalCssFileExists = fs.existsSync(this.globalCssPath)
+      console.log('global.js 存在标记：', isGlobalJsFileExists)
+      console.log('global.css 存在标记：', isGlobalCssFileExists)
+
       this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
+      this.config._isGlobalJsFileExists = isGlobalJsFileExists
+      this.config._isGlobalCssFileExists = isGlobalCssFileExists
+
+  
       let {category, fileData, count, config} = this
       console.log('第一步: 基础数据生成成功 [OK]')
       return {category, fileData, count, config}

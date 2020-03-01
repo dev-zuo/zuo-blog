@@ -35,6 +35,15 @@ class DefaultDraft {
       // 生成category page
       this._generateCategoryPage(topRightLinkHtml, globalScript)
       console.log(`渲染完成, 共生成 ${this.count + 2} 个静态页面 [OK]`)
+
+      // 如果有global.js，拷贝到dist/lib目录
+      if (this.config._isGlobalJsFileExists) {
+        fs.writeFileSync('./dist/lib/global.js', fs.readFileSync('./src/global.js'))
+      } 
+      // 如果有global.css，拷贝到dist/lib目录
+      if (this.config._isGlobalCssFileExists) {
+        fs.writeFileSync('./dist/lib/global.css', fs.readFileSync('./src/global.css'))
+      } 
     } catch(e) {
       console.error(e)
     }
@@ -117,8 +126,12 @@ class DefaultDraft {
     let asideHtml = ''
     let backupOutline = JSON.parse(JSON.stringify(outline))
     for (let i = 0, len = outline.length; i < len; i++) {
+      // 在第一层级 对于分类来说，需要将某个分类的数量加上去
+      let showText = outline[i].text
+      outline[i].count && (showText = `${showText}（${outline[i].count}）`)
+
       asideHtml += '<ul>'
-      asideHtml += `<li><span class="ul-span" data-id="${handlerId(outline[i].text)}" style="padding-left:${outline[i].depth + 'em'}">${outline[i].text}<span></li>`
+      asideHtml += `<li><span class="ul-span" data-id="${handlerId(outline[i].text)}" style="padding-left:${outline[i].depth + 'em'}">${showText}<span></li>`
       if (outline[i].children) {
         asideHtml += getChildrenAsideHtml(outline[i].children)
       } 
@@ -191,13 +204,20 @@ class DefaultDraft {
   _getCategoryContentHtml() {
     let contentHtml = ''
 
+    // console.log(this.category)
+
     for (let [key, value] of Object.entries(this.category)) {
       // console.log(key, value)
       if (!value) continue 
 
       contentHtml += `<span id="${key.toLowerCase()}">${key}(${value.length})</span>`
       contentHtml += `<ul class="category-ul">`
-      value = value.reverse()
+
+      // fix 列表排序问题
+      value.sort((a, b) => {
+        return b.time.split('/').join('') - a.time.split('/').join('')
+      })
+      
       value.forEach(item => {
         contentHtml += `<li><a href="${item.href}">${item.title}</a> (${item.time}) </li>`
       })

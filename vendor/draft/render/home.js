@@ -28,6 +28,7 @@ function render(config, globalScript) {
 
         <title>${title}</title>
         <link rel="shortcut icon" href="/images/favicon.ico">
+        ${config._isGlobalCssFileExists ? '<link rel="stylesheet" href="/lib/global.css">' : ''}
         <style>
           article {
             position: absolute;
@@ -66,6 +67,7 @@ function render(config, globalScript) {
             ${linkList}
           </div>
         </article>
+        ${config._isGlobalJsFileExists ? '<script src="/lib/global.js"></script>' : ''}
         <script>
           ${globalScript}
         </script>
