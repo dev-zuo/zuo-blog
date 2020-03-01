@@ -11,6 +11,8 @@ npm install zuo-blog -g
 ```bash
 ├── src # 写博客文章的目录
 │   ├── _config.json # 全局配置文件
+│   ├── global.js # 全局js
+│   ├── global.css # 全局css 
 │   ├── images # 图片目录
 │   │   ├── blog # 专门放博客图片的目录
 │   │   └── favicon.ico # 站点icon
@@ -42,3 +44,11 @@ zuoblog init # 开始生成，在当前目录(zuo11.com)生成dist目录，可�
 在线示例：[zuo11.com](http://www.zuo11.com)
 
 github地址：https://github.com/zuoxiaobai/zuo11.com
+
+## 更新记录
+- v0.2.0  (2020/03/02)
+  - A 新增 用户可以自定义全局的global.css以及全局的global.js
+  - F 修复 v0.1.0 分类页面笔记未按时间排序的问题，修复右侧大纲没有当前分类文章总数的问题
+  - F 修复 v0.1.0 右侧菜单高度问题
+  - O 优化 将通用js放到一个js里引入
+- v0.1.0 初步完成基本功能
