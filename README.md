@@ -7,7 +7,7 @@ npm package
 
 [![NPM](https://nodei.co/npm/zuo-blog.png)](https://npmjs.org/package/zuo-blog)
 
-## 安装
+## 全局安装
 ```bash
 npm install zuo-blog -g
 ```
@@ -39,17 +39,14 @@ npm install zuo-blog -g
 └── README.md # 说明文档
 ```
 
-## 生成静态页
+## 使用方法
 假设你已经按照上面的目录格式，准备好了md及配置文件，并放到了zuo11.com目录下，使用如下命令生成博客系统
 ```bash
 cd zuo11.com  # 进入zuo11.com目录，确保该目录下包含src，src下面有notes，images目录
 zuoblog init # 开始生成，在当前目录(zuo11.com)生成dist目录，可直接部署到nginx
 ```
 
-## 示例
 在线示例：[zuo11.com](http://www.zuo11.com)
-
-github地址：https://github.com/zuoxiaobai/zuo11.com
 
 ## 更新记录
 v0.2.0 (2020/03/02)
@@ -58,8 +55,10 @@ v0.2.0 (2020/03/02)
 3. F 修复 v0.1.0 右侧菜单高度问题
 4. O 优化 将通用js放到一个js里引入
 
-v0.1.0 初步完成基本功能
-1. A 新增 用户可以自定义全局的global.css以及全局的global.js
-2. F 修复 v0.1.0 分类页面笔记未按时间排序的问题，修复右侧大纲没有当前分类文章总数的问题
-3. f 修复 v0.1.0 右侧菜单高度问题
-4. O 优化 将通用js放到一个js里引入
+v0.1.0 (2020/02/20)
+1. 完成基本功能, 第一个测试版本
+2. 完成默认的内置渲染样式
+
+## 开发思路
+
+最开始这个项目名叫peach，后面为了保持了npm包一致，改名为zuo-blog，详情参见[peach 开发思路及文档](docs/README.md)
