@@ -45,6 +45,7 @@ function render(config, globalScript, payload) {
         <link href="/lib/prismjs/prism_default.css" rel="stylesheet" />
         <link href="/lib/notes.css" rel="stylesheet" />
         ${config._isGlobalCssFileExists ? '<link rel="stylesheet" href="/lib/global.css">' : ''}
+        ${config.headFragment || ''}
       </head>
       <body>
         <header>
@@ -81,6 +82,7 @@ function render(config, globalScript, payload) {
         <script>
           ${globalScript}
         </script>
+        ${config.bodyFragment || ''}
       </body>
     </html>
   `

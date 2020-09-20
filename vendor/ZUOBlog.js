@@ -10,6 +10,8 @@ class ZUOBlog {
     this.configPath = './src/_config.json'
     this.globalJsPath = './src/global.js'
     this.globalCssPath = './src/global.css'
+    this.headFragment = './src/headFragment.html'
+    this.bodyFragment = './src/bodyFragment.html'
     this.count = 0 // md文件数量
     this.category = {} // 分类信息
     this.fileData = [] // 处理后的文章数据，每条数据包含fileStr, htmlStr, outline, config
@@ -39,6 +41,14 @@ class ZUOBlog {
       this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
       this.config._isGlobalJsFileExists = isGlobalJsFileExists
       this.config._isGlobalCssFileExists = isGlobalCssFileExists
+
+      // 引入head、body代码片段
+      if (fs.existsSync(this.headFragment)) {
+        this.config.headFragment = fs.readFileSync(this.headFragment).toString()
+      }
+      if (fs.existsSync(this.bodyFragment)) {
+        this.config.bodyFragment = fs.readFileSync(this.bodyFragment).toString()
+      }
 
   
       let {category, fileData, count, config} = this

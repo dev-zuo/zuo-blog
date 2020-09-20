@@ -72,6 +72,7 @@ function render(config, globalScript) {
             color: #666;
           }
         </style>
+        ${config.headFragment || ''}
       </head>
       <body>
         <article>
@@ -93,6 +94,7 @@ function render(config, globalScript) {
         <script>
           ${globalScript}
         </script>
+        ${config.bodyFragment || ''}
       </body>
     </html>
   `
