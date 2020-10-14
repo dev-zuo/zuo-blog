@@ -49,6 +49,12 @@ zuoblog init # 开始生成，在当前目录(zuo11.com)生成dist目录，可�
 在线示例：[zuo11.com](http://www.zuo11.com)
 
 ## 更新记录
+v0.5.0 (2020/10/14)
+1. A 新增 在当前构建目录生成 notesData.json，里面包含所有的页面信息
+2. A 新增 嵌入代码全局参数，用于在页面指定位置嵌入广告。asideTopHtml(侧边栏顶部)、articleTopHtml(文章顶部)、commentTopHtml(评论顶部)、noteInnerAdHtml(分类文章内部)
+3. F 修复 侧边栏id生成问题，使用 marked 插件生成ID方法
+4. O 优化 优化分类页展示效果
+
 v0.4.0 (2020/09/20)
 1. A 新增 head、body代码片段引入功能
 

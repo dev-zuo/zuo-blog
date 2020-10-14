@@ -15,6 +15,8 @@ class DefaultDraft {
 
   // 根据元数据，生成静态博客系统
   init(notesData) {
+    fs.writeFileSync('notesData.json', '{}')
+    fs.writeFileSync('notesData.json', JSON.stringify(notesData, null, 2))
     Object.assign(this, notesData)
     console.log('第二步: 开始渲染模板...')
     try {
@@ -96,6 +98,7 @@ class DefaultDraft {
    * @param {*} globalScript 
    */
   _generateNotePage(topRightLinkHtml, globalScript) {
+    // console.log(fileData, this.fileData)
     this.fileData.forEach(item => {
       // 根据大纲数据(JSON)生成侧边栏html
       let asideHtml = this._getAsideHtml(item.outline) 
@@ -119,8 +122,18 @@ class DefaultDraft {
    */
   _getAsideHtml(outline) {
     function handlerId(id) {
-      let newId = id.toLowerCase().replace(/\s/g, '-')
-      newId = newId.replace(/[\(\)\/\,\=\>\.\:\+]/g, '')
+      // let newId = id.toLowerCase().replace(/\s/g, '-')
+      // newId = newId.replace(/[\(\)\/\,\=\>\.\:\+]/g, '')
+      // return newId
+
+      // fix id 生成问题 marked. /lib/marked.esm.js Slugger generates header id
+      let newId = id.toLowerCase()
+      .trim()
+      // remove html tags
+      .replace(/<[!\/a-z].*?>/ig, '')
+      // remove unwanted chars
+      .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
+      .replace(/\s/g, '-');
       return newId
     }
     let asideHtml = ''
@@ -128,7 +141,8 @@ class DefaultDraft {
     for (let i = 0, len = outline.length; i < len; i++) {
       // 在第一层级 对于分类来说，需要将某个分类的数量加上去
       let showText = outline[i].text
-      outline[i].count && (showText = `${showText}（${outline[i].count}）`)
+      // outline[i].count && (showText = `${showText}（${outline[i].count}）`)
+      outline[i].count && (showText = `${showText} ${outline[i].count}`)
 
       asideHtml += '<ul>'
       asideHtml += `<li><span class="ul-span" data-id="${handlerId(outline[i].text)}" style="padding-left:${outline[i].depth + 'em'}">${showText}<span></li>`
@@ -211,6 +225,10 @@ class DefaultDraft {
       if (!value) continue 
 
       contentHtml += `<span id="${key.toLowerCase()}">${key}(${value.length})</span>`
+      // 文章内嵌广告
+      if (value.length > 20 && this.config.noteInnerAdHtml)  {
+        contentHtml += this.config.noteInnerAdHtml
+      }
       contentHtml += `<ul class="category-ul">`
 
       // fix 列表排序问题

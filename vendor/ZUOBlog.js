@@ -144,7 +144,9 @@ class ZUOBlog {
     this.category[categoryName].push({
       title: article.source.split('.md')[0],
       href: dateStr + '/' + article.staticFileName,
-      time: article.createDate
+      time: article.createDate,
+      description: article.description,
+      keywords: article.keywords
     })
   }
 
