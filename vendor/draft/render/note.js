@@ -88,10 +88,10 @@ function render(config, globalScript, payload) {
 
           <aside>
             <div class="aside-wrap">
-              ${config.asideTopHtml || ''}
               <div class="top ${articleConfig.isCategory ? 'category' : ''}">
                 ${asideHtml}
-              <div>
+              </div>
+              ${config.asideTopHtml || ''}
             </div>
           </aside>
         </section>

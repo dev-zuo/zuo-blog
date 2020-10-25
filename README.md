@@ -1,7 +1,7 @@
 # zuo-blog
 > 基于Node.js的轻量级静态博客生成框架，类似于hexo
 
-![version-v0.5.0](https://img.shields.io/badge/version-v0.5.0-yellow.svg) ![license-MIT](https://img.shields.io/badge/license-MIT-green.svg) 
+![version-v0.6.0](https://img.shields.io/badge/version-v0.6.0-yellow.svg) ![license-MIT](https://img.shields.io/badge/license-MIT-green.svg) 
 
 npm package
 
@@ -50,6 +50,10 @@ zuoblog init # 开始生成，在当前目录(zuo11.com)生成dist目录，可�
 
 ## 更新记录
 ```js
+v0.6.0 (2020/10/26)
+1. O 优化 右侧 asideTopHtml 广告加载位置
+2. O 优化 滚动focus大纲逻辑
+
 v0.5.0 (2020/10/14)
 1. A 新增 在当前构建目录生成 notesData.json，里面包含所有的页面信息
 2. A 新增 嵌入代码全局参数，用于在页面指定位置嵌入广告。asideTopHtml(侧边栏顶部)、articleTopHtml(文章顶部)、commentTopHtml(评论顶部)、noteInnerAdHtml(分类文章内部)
