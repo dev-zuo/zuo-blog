@@ -1,66 +1,81 @@
+# 介绍
 
-## peach 开发思路及文档
-之前用jquery+jsp+servlet+mysql写了一套个人博客系统，用在zuo11.com上，从16年10月左右上线到17年2月，发布了大概46篇笔记博文。之后工作就基本没更新过了，直到现在才打算好好整一下这快。方便后面积累。
+zuo-blog 是一个基于 Node.js 的轻量级静态博客生成框架，类似于hexo
 
-### 重写
-前端jsp+jquery，后端java+mysql，有几个不满意的地方:
+![version-v0.2.0](https://img.shields.io/badge/version-v0.2.0-yellow.svg) ![build-passing](https://img.shields.io/badge/build-passing-green.svg) ![license-MIT](https://img.shields.io/badge/license-MIT-green.svg) 
 
-- 技术栈陈旧，基本不想继续在原来的代码上维护了
-- 页面都是服务端渲染，每次访问文章都会去数据库查询文章，然后展示
-- 每次写文章，都是在线的UEditor编辑器，不支持markdown语法，生成的文章内容比较乱
-- 分类展示效果不好，访客记录不够完善
-- 评论系统使用的第三方畅言，可控性较差。
+npm package
 
-理想的改动是和hexo类似，直接写md笔记，然后放入固定的目录，生成静态链接的博客文章
-#### 从最基础的开始
-将markdown文件，生成一个静态网页，用node实现。 找到一个不错的开源代码marked.js，可以直接使用。
+[![NPM](https://nodei.co/npm/zuo-blog.png)](https://npmjs.org/package/zuo-blog)
 
-- 把src这个目录专门用来做开发目录。
-``` js
-cd src;
-npm init; // 初始化package.json
-入口 index.js开始处理逻辑
+## 全局安装
+```bash
+npm install zuo-blog -g
 ```
-读取notes目录的md文件，直接用markedjs转成html元素再套入html模板，生成html静态文件即可
-``` js
 
-// index.js peach entrance
-
-let marked = require('./lib/marked') // import marked.js
-
-// 读取notes目录的笔记，然后转换为html元素，再写到静态html文件里
-let fs = require('fs')
-fs.readFile('./notes/testmd.md', (err, data) => {
-  if (err) {
-    console.log(err);
-    return;
-  }
-
-  // 这里加入了基本的html框架，加入了代码高亮prismjs
-  let htmlStr = `<!DOCTYPE html>
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <title>Title</title>
-      <link href="../lib/prismjs/prism_default.css" rel="stylesheet" />
-    </head>
-    <body>
-      ${marked(data.toString())}
-      <script src="../lib/prismjs/prism_default.js"></script>
-    </body>
-  </html>
-  `
-  fs.writeFile('./notes/testmd.html', htmlStr, () => {
-    console.log('写入文件成功');
-  })
-})
+## 目录结构要求
+按照如下目录结构，写对应的md文章
+```bash
+├── src # 写博客文章的目录
+│   ├── _config.json # 全局配置文件
+│   ├── global.js # 全局js
+│   ├── global.css # 全局css 
+│   ├── images # 图片目录
+│   │   ├── blog # 专门放博客图片的目录
+│   │   └── favicon.ico # 站点icon
+│   └── notes # 博客文章，按年月分目录
+│       ├── 2016
+│       │   ├── 10 # 每个月份目录下放当月写的文章及当前月的配置文件
+│       │   │   ├── _info.json # 配置文件记录了当前目录下每篇文章的配置、seo参数等
+│       │   │   ├── xxx1.md # 博客文章
+│       │   │   └── xxx2.md
+│       │   ├── 11
+│       │   └── 12
+│       ├── ...
+│       └── 2020 # 2020年目录
+│           ├── 1 # 2020年1月目录
+│           │   ├──  _info.json
+│           │   └──  xx45.md
+│           └── 2 
+└── README.md # 说明文档
 ```
-#### 博客页面结构规划
-基础ok后，需要规划下博客的页面结构，样式等。回到初衷，我心里我的博客应该是怎么样的？
-- 博客并不是知识系统化的一个地方，这需要一个单独用一个仓库去整理，博客只需要挂一个链接到该地址即可
-- 博客主要针对某个问题展开，可以是遇到某个坑的总结、某个开源项目源码分析、学到新知识点后的总结、工作中的一些所见所想等。
-- 主要以SEO为入口，其他开发者可能会遇到的问题，百度、google会搜索什么问题，然后结合自己遇到的问题去总结归纳。
-- 项目/demo展示(五子棋、扫雷、模仿某些效果，样式等)
 
+## 使用方法
+假设你已经按照上面的目录格式，准备好了md及配置文件，并放到了zuo11.com目录下，使用如下命令生成博客系统
+```bash
+cd zuo11.com  # 进入zuo11.com目录，确保该目录下包含src，src下面有notes，images目录
+zuoblog init # 开始生成，在当前目录(zuo11.com)生成dist目录，可直接部署到nginx
+```
 
+在线示例：[zuo11.com](http://www.zuo11.com)
+
+## 更新记录
+
+```
+v0.5.0 (2020/10/14)
+1. A 新增 在当前构建目录生成 notesData.json，里面包含所有的页面信息
+2. A 新增 嵌入代码全局参数，用于在页面指定位置嵌入广告。asideTopHtml(侧边栏顶部)、articleTopHtml(文章顶部)、commentTopHtml(评论顶部)、noteInnerAdHtml(分类文章内部)
+3. F 修复 侧边栏id生成问题，使用 marked 插件生成ID方法
+4. O 优化 优化分类页展示效果
+
+v0.4.0 (2020/09/20)
+1. A 新增 head、body代码片段引入功能
+
+v0.3.0 (2020/03/08)
+1. A 新增 应监管要求，网站底部增加备案信息
+
+v0.2.0 (2020/03/02)
+1. A 新增 用户可以自定义全局的global.css以及全局的global.js
+2. F 修复 v0.1.0 分类页面笔记未按时间排序的问题，修复右侧大纲没有当前分类文章总数的问题
+3. F 修复 v0.1.0 右侧菜单高度问题
+4. O 优化 将通用js放到一个js里引入
+
+v0.1.0 (2020/02/20)
+1. 完成基本功能, 第一个测试版本
+2. 完成默认的内置渲染样式
+```
+
+## 开发思路
+
+最开始这个项目名叫peach，后面为了保持了npm包一致，改名为zuo-blog，详情参见 [peach开发思路及文档](/other/peach.md)
 

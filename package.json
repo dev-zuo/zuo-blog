@@ -4,7 +4,9 @@
   "description": "a staic blog system like hexo",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
   },
   "repository": {
     "type": "git",
@@ -27,5 +29,8 @@
   "dependencies": {
     "commander": "^4.1.0",
     "marked": "^0.8.0"
+  },
+  "devDependencies": {
+    "vuepress": "^1.7.1"
   }
 }

@@ -49,6 +49,7 @@ zuoblog init # 开始生成，在当前目录(zuo11.com)生成dist目录，可�
 在线示例：[zuo11.com](http://www.zuo11.com)
 
 ## 更新记录
+```js
 v0.5.0 (2020/10/14)
 1. A 新增 在当前构建目录生成 notesData.json，里面包含所有的页面信息
 2. A 新增 嵌入代码全局参数，用于在页面指定位置嵌入广告。asideTopHtml(侧边栏顶部)、articleTopHtml(文章顶部)、commentTopHtml(评论顶部)、noteInnerAdHtml(分类文章内部)
@@ -70,8 +71,9 @@ v0.2.0 (2020/03/02)
 v0.1.0 (2020/02/20)
 1. 完成基本功能, 第一个测试版本
 2. 完成默认的内置渲染样式
+```
 
 ## 开发思路
 
-最开始这个项目名叫peach，后面为了保持了npm包一致，改名为zuo-blog，详情参见[peach 开发思路及文档](docs/README.md)
+最开始这个项目名叫peach，后面为了保持了npm包一致，改名为zuo-blog，详情参见[peach 开发思路及文档](docs/other/peach.md)
 
