@@ -1,5 +1,5 @@
 module.exports = {
-  base: '/zuo-blog/',
+  // base: '/zuo-blog/',
   title: 'zuo-blog',
   description: '静态博客生成工具',
   themeConfig: {
@@ -10,7 +10,8 @@ module.exports = {
         sidebarDepth: 1,    // 可选的, 默认值是 1
         children: [
           '/',
-          '/config.md'
+          '/config.md',
+          '/vueTest.md'
         ]
       }
       // {

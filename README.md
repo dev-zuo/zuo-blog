@@ -1,7 +1,7 @@
 # zuo-blog
 > 基于Node.js的轻量级静态博客生成框架，类似于hexo
 
-![version-v0.2.0](https://img.shields.io/badge/version-v0.2.0-yellow.svg) ![build-passing](https://img.shields.io/badge/build-passing-green.svg) ![license-MIT](https://img.shields.io/badge/license-MIT-green.svg) 
+![version-v0.5.0](https://img.shields.io/badge/version-v0.5.0-yellow.svg) ![license-MIT](https://img.shields.io/badge/license-MIT-green.svg) 
 
 npm package
 
