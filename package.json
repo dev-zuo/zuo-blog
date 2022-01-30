@@ -28,7 +28,7 @@
   "homepage": "https://github.com/zuoxiaobai/zuo-blog#readme",
   "dependencies": {
     "commander": "^4.1.0",
-    "marked": "^0.8.0"
+    "marked": "^4.0.10"
   },
   "devDependencies": {
     "vuepress": "^1.7.1"
