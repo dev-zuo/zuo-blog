@@ -14,9 +14,14 @@ npm install zuo-blog -g
 
 ## 目录结构要求
 按照如下目录结构，写对应的md文章
+
+- break updates: 全局配置文件 _config.json => config.json
+- feat: 将当前 extraRootFiles 目录的文件copy到dist/blog目录
+- 每次修改调试都要 sudo npm link 再到 zuo11.com 仓库看结果，很慢，新建 test 目录，弄一些测试 demo，方便调试
+
 ```bash
 ├── src # 写博客文章的目录
-│   ├── _config.json # 全局配置文件
+│   ├── config.json # 全局配置文件
 │   ├── global.js # 全局js
 │   ├── global.css # 全局css 
 │   ├── images # 图片目录

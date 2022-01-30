@@ -1,13 +1,16 @@
 
 const FSExtend = require('./utils/FSExtend')
+const fsPromise = require('fs/promises');
 const fs = require('fs')
 const marked = require('marked')
+console.log(marked)
+const matter = require('gray-matter')
 
 class ZUOBlog {
 
   constructor() {
     this.notesPath = './src/notes' // notes目录 
-    this.configPath = './src/_config.json'
+    this.configPath = './src/config.json'
     this.globalJsPath = './src/global.js'
     this.globalCssPath = './src/global.css'
     this.headFragment = './src/headFragment.html'
@@ -72,6 +75,9 @@ class ZUOBlog {
 
     // 将当前src目录的images文件copy到dist目录
     FSExtend.copyFolder('./src/images', './dist/images')
+
+    // 将当前 extraRootFiles 目录的文件copy到dist/blog目录
+    FSExtend.copyFolder('./extraRootFiles', './dist/blog')
   }
 
   // 开始遍历notes目录
@@ -82,29 +88,73 @@ class ZUOBlog {
       const yearPath = `${this.notesPath}/${year}` // './src/notes/2019'
       
       // 遍历该年份下月分目录[ '1', '2' ]
-      fs.readdirSync(yearPath).forEach(month => {  
+      fs.readdirSync(yearPath).forEach(async month => {  
         if (month.startsWith('.')) return // 过滤掉隐藏文件
         const monthPath = `${yearPath}/${month}` // './src/notes/2019/1'
-        const monthCfgPath = `${monthPath}/_info.json` // 配置文件
+        
+        // v0.7.0
+        // const monthCfgPath = `${monthPath}/_info.json` // 配置文件
+        // // 如果配置文件存在
+        // if (fs.existsSync(monthCfgPath)) {  
+        //   // if (year !== '2019') return  // 测试单个文件用
+        //   // 根据配置文件遍历md文件
+        //   JSON.parse(fs.readFileSync(monthCfgPath)).forEach(article => { 
+        //     const articlePath = `${monthPath}/${article.source}` // './src/notes/2019/1/xxx.md'
+        //     this._handlerMdFile(article, articlePath, year, month) 
+        //   })
+        // }
 
-        // 如果配置文件存在
-        if (fs.existsSync(monthCfgPath)) {  
-          // if (year !== '2019') return  // 测试单个文件用
-          // 根据配置文件遍历md文件
-          JSON.parse(fs.readFileSync(monthCfgPath)).forEach(article => { 
-            const articlePath = `${monthPath}/${article.source}` // './src/notes/2019/1/xxx.md'
-            this._handlerMdFile(article, articlePath, year, month) 
+        // v1.0.0
+        // 读取目录下的所有 md 文件
+        try {
+          let files = fs.readdirSync(monthPath, {
+            withFileTypes: true // 不返回文件数组，返回文件 <fs.Dirent> 对象
           })
+          // console.log(files);
+      
+          if (files && Array.isArray(files)) {
+            files.forEach(async item => {
+              console.log(item.name,item.isDirectory())
+              // 隐藏文件不处理
+              if (item.name.startsWith('.') || !item.name.includes('.md')) {
+                console.log(`[Warn] ${item.name} 不是 markdown 文件`)
+                return
+              }
+              const articlePath = `${monthPath}/${item.name}` // './src/notes/2019/1/xxx.md'
+              this._handlerMdFile(articlePath, year, month) 
+            })
+          }
+        } catch(e) {
+          console.error(e)
         }
+        
       })
     })
   }
 
   // 处理md文件
-  _handlerMdFile(article, articlePath, year, month) {
+  async _handlerMdFile(articlePath, year, month) {
     // 读取文件内容，通过maked转换为html字符串
-    const fileStr = fs.readFileSync(articlePath).toString() 
-    let htmlStr = marked(fileStr)
+    // const fileStr = fs.readFileSync(articlePath).toString() 
+    let fileBuffer = fs.readFileSync(articlePath);
+    let fileText = fileBuffer.toString() 
+
+    // 读取 front matter 信息、支持 YAML/JSON
+    let res = matter(fileText)
+    console.log(res)
+    let { data: articleConfig = {}, content:fileStr } = res || {}
+    if (JSON.stringify(articleConfig) === '{}') {
+      console.log(`[Warn]: ${articlePath} 缺少 front-matter 信息`)
+      return;
+    }
+    // {
+    //   content: '\n# title\nwoshineirong ',
+    //   data: { title: 'Blogging Like a Hacker', lang: 'en-US' },
+    //   isEmpty: false,
+    //   excerpt: ''
+    // }
+
+    let htmlStr = marked.parse(fileStr)
     let headers = marked.lexer(fileStr).filter(item => item.type === 'heading')
     let outline = this._generateOutline(headers) // 根据文件内容生成大纲数据
     // console.log(JSON.stringify(outline, null, 2))
@@ -116,11 +166,11 @@ class ZUOBlog {
       // fileStr,
       htmlStr,
       outline,
-      config: { ...article, year, month }
+      config: { ...articleConfig, year, month }
     })
 
     // 收集数据到cateory对象
-    this._handlerCategory(article, year, month)
+    this._handlerCategory(articleConfig, year, month)
     this.count++ // 文件数量+1
   }
 

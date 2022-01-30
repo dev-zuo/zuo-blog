@@ -1,6 +1,6 @@
 {
   "name": "zuo-blog",
-  "version": "0.7.1",
+  "version": "1.0.0",
   "description": "a staic blog system like hexo",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,7 @@
   "homepage": "https://github.com/zuoxiaobai/zuo-blog#readme",
   "dependencies": {
     "commander": "^4.1.0",
+    "gray-matter": "^4.0.3",
     "marked": "^4.0.10"
   },
   "devDependencies": {

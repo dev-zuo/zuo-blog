@@ -13,6 +13,9 @@ const zuoblog = new ZUOBlog()
 // 1.获取元数据
 let notesData = zuoblog.getNotesData()
 
+console.log('===>', notesData) // 测试数据是否 OK
+
+
 // 2.根据基础元数据，生成静态博客系统
 let Draft
 
