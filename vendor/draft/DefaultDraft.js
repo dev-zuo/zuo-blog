@@ -190,7 +190,7 @@ class DefaultDraft {
     // 根据大纲数据(JSON)生成侧边栏html
     let asideHtml = this._getAsideHtml(outline) 
     let articleConfig = {
-      "source": '文章分类.md',
+      "title": '文章分类',
       "staticFileName": "category.html",
       "category": "分类",
       "author": this.config.indexConfig.author,

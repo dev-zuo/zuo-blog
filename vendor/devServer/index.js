@@ -1,6 +1,4 @@
-
 // 开启一个静态服务，指向当前路径下的 dist 目录
-
 class DevServer {
   start(port = '8888') {
     const Koa = require('koa')
