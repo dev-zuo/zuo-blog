@@ -8,23 +8,26 @@ const ZUOBlog = require('../vendor/ZUOBlog')
 const zuoblog = new ZUOBlog()
 
 // 最开始zuoblog调用一个函数就可以直接生成静态文件，但考虑到 主题 可扩展性，
-// 改为两步来操作：1.先将元数据准备好，根据 主题 渲染元数据
+// 改为两步来操作：1.先将元数据准备好 2.根据 主题 渲染元数据
 
-// 1.获取元数据
+/**
+ * 1.获取元数据
+ * @param { Object } category 分类信息
+ * @param { Array } fileData 所有文件列表信息
+ * @param { Number } count 有效 md 文件数量
+ * @param { Object } config 全局配置
+ * @param { Array } validFileList 有效 md 文件列表
+ * @param { Array } invalidConfigFileList 无效文件名(非 md 或隐藏文件) - 文件列表
+ * @param { Array } invalidNameFileList 无效配置 - 文件列表
+ */
 let notesData = zuoblog.getNotesData()
 
-console.log('===>', notesData) // 测试数据是否 OK
+// 2. 根据默认主题渲染页面
+const DefaultDraft = require('../vendor/draft/DefaultDraft')
+const defaultDraft = new DefaultDraft()
+defaultDraft.init(notesData) // 根据默认主题生成静态博客系统
 
-
-// 2.根据基础元数据，生成静态博客系统
-let Draft
-
-// 如果有指定 主题，根据主题生成blog
-// 待扩展
-
-// 使用默认主题
-Draft = require('../vendor/draft/DefaultDraft')
-const draft = new Draft()
-draft.init(notesData) // 根据默认主题生成静态博客系统
-
-
+// 增强 - dev server
+const DevServer = require('../vendor/devServer/index')
+const devServer = new DevServer()
+devServer.start()

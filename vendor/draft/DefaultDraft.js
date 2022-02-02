@@ -15,8 +15,6 @@ class DefaultDraft {
 
   // 根据元数据，生成静态博客系统
   init(notesData) {
-    fs.writeFileSync('notesData.json', '{}')
-    fs.writeFileSync('notesData.json', JSON.stringify(notesData, null, 2))
     Object.assign(this, notesData)
     console.log('第二步: 开始渲染模板...')
     try {

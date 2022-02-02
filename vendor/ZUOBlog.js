@@ -1,9 +1,7 @@
 
 const FSExtend = require('./utils/FSExtend')
-const fsPromise = require('fs/promises');
 const fs = require('fs')
 const marked = require('marked')
-console.log(marked)
 const matter = require('gray-matter')
 
 class ZUOBlog {
@@ -15,7 +13,10 @@ class ZUOBlog {
     this.globalCssPath = './src/global.css'
     this.headFragment = './src/headFragment.html'
     this.bodyFragment = './src/bodyFragment.html'
-    this.count = 0 // md文件数量
+    this.count = 0 // 有效 md 文件数量
+    this.validFileList = []
+    this.invalidNameFileList = [] // 第一次过滤：无效名称 - 文件列表（. 开头或非 md文件）
+    this.invalidConfigFileList = [] // 第二次过滤：无效配置信息 - 文件列表（front matter 信息异常）
     this.category = {} // 分类信息
     this.fileData = [] // 处理后的文章数据，每条数据包含fileStr, htmlStr, outline, config
     this.config = {} // 配置文件
@@ -53,14 +54,19 @@ class ZUOBlog {
         this.config.bodyFragment = fs.readFileSync(this.bodyFragment).toString()
       }
 
-  
-      let {category, fileData, count, config} = this
+
+      let { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList } = this
+      const notesData = { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList }
+      
+      fs.writeFileSync('notesData.json', JSON.stringify(notesData, null, 2), (err) => {
+        console.log(err)
+      })
       console.log('第一步: 基础数据生成成功 [OK]')
-      return {category, fileData, count, config}
-    } catch(e) {
+      return notesData
+    } catch (e) {
       console.error(e)
       return {}
-    }   
+    }
   }
 
   /**
@@ -71,7 +77,7 @@ class ZUOBlog {
     FSExtend.deleteFolder('./dist')
 
     // 新建dist目录，blog目录，类似于 mkdir -p dist/blog
-    fs.mkdirSync('./dist/blog', {recursive: true})
+    fs.mkdirSync('./dist/blog', { recursive: true })
 
     // 将当前src目录的images文件copy到dist目录
     FSExtend.copyFolder('./src/images', './dist/images')
@@ -83,15 +89,15 @@ class ZUOBlog {
   // 开始遍历notes目录
   _startErgodicNotes() {
     // 遍历年份目录 ['2019', '2020' ]
-    fs.readdirSync(this.notesPath).forEach(year => { 
+    fs.readdirSync(this.notesPath).forEach(year => {
       if (year.startsWith('.')) return // 过滤掉隐藏文件
       const yearPath = `${this.notesPath}/${year}` // './src/notes/2019'
-      
+
       // 遍历该年份下月分目录[ '1', '2' ]
-      fs.readdirSync(yearPath).forEach(async month => {  
+      fs.readdirSync(yearPath).forEach(async month => {
         if (month.startsWith('.')) return // 过滤掉隐藏文件
         const monthPath = `${yearPath}/${month}` // './src/notes/2019/1'
-        
+
         // v0.7.0
         // const monthCfgPath = `${monthPath}/_info.json` // 配置文件
         // // 如果配置文件存在
@@ -105,73 +111,78 @@ class ZUOBlog {
         // }
 
         // v1.0.0
-        // 读取目录下的所有 md 文件
-        try {
-          let files = fs.readdirSync(monthPath, {
-            withFileTypes: true // 不返回文件数组，返回文件 <fs.Dirent> 对象
+        // 读取目录 src/notes/[year]/[month] 下的所有 md 文件
+        let files = fs.readdirSync(monthPath, {
+          withFileTypes: true // 不返回文件数组，返回文件 <fs.Dirent> 对象
+        })
+        // console.log(files);
+
+        if (files && Array.isArray(files)) {
+          files.forEach(async item => {
+            const articlePath = `${monthPath}/${item.name}` // './src/notes/2019/1/xxx.md'
+
+            // 隐藏文件不处理
+            if (item.name.startsWith('.') || !item.name.includes('.md')) {
+              console.log(`[Warn] ${articlePath} 不是 markdown 文件，不做处理`)
+              this.invalidNameFileList.push(articlePath)
+              return
+            }
+
+            this._handlerMdFile(articlePath, year, month)
           })
-          // console.log(files);
-      
-          if (files && Array.isArray(files)) {
-            files.forEach(async item => {
-              console.log(item.name,item.isDirectory())
-              // 隐藏文件不处理
-              if (item.name.startsWith('.') || !item.name.includes('.md')) {
-                console.log(`[Warn] ${item.name} 不是 markdown 文件`)
-                return
-              }
-              const articlePath = `${monthPath}/${item.name}` // './src/notes/2019/1/xxx.md'
-              this._handlerMdFile(articlePath, year, month) 
-            })
-          }
-        } catch(e) {
-          console.error(e)
         }
-        
+
       })
     })
   }
 
   // 处理md文件
   async _handlerMdFile(articlePath, year, month) {
-    // 读取文件内容，通过maked转换为html字符串
-    // const fileStr = fs.readFileSync(articlePath).toString() 
-    let fileBuffer = fs.readFileSync(articlePath);
-    let fileText = fileBuffer.toString() 
+    try {
+      let fileBuffer = fs.readFileSync(articlePath);
+      let fileText = fileBuffer.toString()
 
-    // 读取 front matter 信息、支持 YAML/JSON
-    let res = matter(fileText)
-    console.log(res)
-    let { data: articleConfig = {}, content:fileStr } = res || {}
-    if (JSON.stringify(articleConfig) === '{}') {
-      console.log(`[Warn]: ${articlePath} 缺少 front-matter 信息`)
-      return;
+      // 读取 front matter 信息、支持 YAML/JSON
+      let res = matter(fileText)
+      let { data: articleConfig = {}, content } = res || {}
+      // TODO，如果配置中文件名重复怎么处理
+      // Enhance，没有设置静态文件名等，根据通用规则设置初始化文件信息
+      if (JSON.stringify(articleConfig) === '{}') {
+        console.log(`[Error]: ${articlePath} 缺少 front-matter 信息，请补充`)
+        this.invalidConfigFileList.push(articlePath)
+        return;
+      }
+
+      // {
+      //   content: '\n# title\nwoshineirong ',
+      //   data: { title: 'Blogging Like a Hacker', lang: 'en-US' },
+      //   isEmpty: false,
+      //   excerpt: ''
+      // }
+
+      let htmlStr = marked.parse(content)
+      let headers = marked.lexer(content).filter(item => item.type === 'heading')
+
+      // TODO 大纲优化
+      let outline = this._generateOutline(headers) // 根据文件内容生成大纲数据
+      // console.log(JSON.stringify(outline, null, 2))
+
+      // 为了解耦 可扩展增加主题，先收集数据，然后根据主题统一生成文件文件
+      // generatorHtml(htmlStr, outline, `${year}/${month}`, article)
+      // 将文件数据存到 fileData
+      this.fileData.push({
+        htmlStr,
+        outline,
+        config: { ...articleConfig, year, month }
+      })
+
+      // 收集数据到cateory对象
+      this._handlerCategory(articleConfig, year, month)
+      this.validFileList.push(articlePath)
+      this.count++ // 文件数量+1
+    } catch (e) {
+      console.log(e.messge)
     }
-    // {
-    //   content: '\n# title\nwoshineirong ',
-    //   data: { title: 'Blogging Like a Hacker', lang: 'en-US' },
-    //   isEmpty: false,
-    //   excerpt: ''
-    // }
-
-    let htmlStr = marked.parse(fileStr)
-    let headers = marked.lexer(fileStr).filter(item => item.type === 'heading')
-    let outline = this._generateOutline(headers) // 根据文件内容生成大纲数据
-    // console.log(JSON.stringify(outline, null, 2))
-
-    // 为了解耦 可扩展增加主题，先收集数据，然后根据主题统一生成文件文件
-    // generatorHtml(htmlStr, outline, `${year}/${month}`, article)
-    // 将文件数据存到 fileData
-    this.fileData.push({
-      // fileStr,
-      htmlStr,
-      outline,
-      config: { ...articleConfig, year, month }
-    })
-
-    // 收集数据到cateory对象
-    this._handlerCategory(articleConfig, year, month)
-    this.count++ // 文件数量+1
   }
 
   /**
@@ -185,15 +196,21 @@ class ZUOBlog {
     let categoryName = article.category
     !this.category[categoryName] && (this.category[categoryName] = [])
 
-    // 2018/01/14  => 2018/1
-    let dateArr = article.createDate.split('/')
-    dateArr.pop() //['2018', '01']
-    dateArr[1] = Number(dateArr[1]) // ['2018', 1]
-    let dateStr = dateArr.join('/') // 2018/1
+    // // 2018/01/14  => 2018/1
+    // let dateArr = article.createDate.split('/')
+    // dateArr.pop() //['2018', '01']
+    // dateArr[1] = Number(dateArr[1]) // ['2018', 1]
+    // let dateStr = dateArr.join('/') // 2018/1
+
+    // 原先是根据 createDate 来确定路径，现在根据文件路径来确定 url
+    // 这样路径就定死了，createDate 仅用于页面显示创建日期
+    year = Number(year)
+    month = Number(month)
 
     this.category[categoryName].push({
-      title: article.source.split('.md')[0],
-      href: dateStr + '/' + article.staticFileName,
+      // title: article.source.split('.md')[0], // 原先从_info.json 取文件名，改为从 配置中取文件名
+      title: article.title,
+      href: `${year}/${month}/${article.staticFileName}`,
       time: article.createDate,
       description: article.description,
       keywords: article.keywords
@@ -228,7 +245,7 @@ class ZUOBlog {
             // 如果是3级+，遍历到最近一个层级的list
             let count = item.depth - 2
             target = tree.slice(-1)[0]
-            while(count--) {
+            while (count--) {
               target = target.children.slice(-1)[0]
             }
           }
@@ -236,10 +253,10 @@ class ZUOBlog {
           target.children.push(item)
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e)
       let text = '目录生成异常，请确保目录层级从H1到H6是正常顺序，对于没有H1或目录中间断层的情况需要修正'
-      return [ { text } ]
+      return [{ text }]
     }
     return tree
   }

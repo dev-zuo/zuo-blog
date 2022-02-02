@@ -29,6 +29,8 @@
   "dependencies": {
     "commander": "^4.1.0",
     "gray-matter": "^4.0.3",
+    "koa": "^2.13.4",
+    "koa-static": "^5.0.0",
     "marked": "^4.0.10"
   },
   "devDependencies": {

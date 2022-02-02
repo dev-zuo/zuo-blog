@@ -56,7 +56,7 @@ function render(config, globalScript, payload) {
         <meta name="description" content="${articleConfig.description}">
         <meta name="keywords" content="${articleConfig.keywords}">
 
-        <title>${articleConfig.source.split('.md')[0]} - ${title}</title>
+        <title>${articleConfig.title} - ${title}</title>
         <link rel="shortcut icon" href="/images/favicon.ico">
         <link href="/lib/prismjs/prism_default.css" rel="stylesheet" />
         <link href="/lib/notes.css" rel="stylesheet" />
