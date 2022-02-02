@@ -12,14 +12,14 @@
  * }
  */
 function render(config, globalScript, payload) {
-  let {title, footer} = config
+  let { title, footer } = config
   let { articleHtml, articleConfig, asideHtml, topRightLinkHtml } = payload
 
   // 分类的链接
   let categoryHref = '/blog/category.html#' + articleConfig.category.toLowerCase()
   articleConfig.isCategory && (categoryHref = '')
 
-  
+
   let h1StartIndex = articleHtml.indexOf('<h1 id="')
   let h1EndIndex = articleHtml.indexOf('</h1>')
   let h1Title = ''
@@ -41,6 +41,12 @@ function render(config, globalScript, payload) {
       </div>
     </div>
     ${config.articleTopHtml || ''}
+  `
+
+  let editOnGithub = (!config.editOnGithubPrePath || !articleConfig.path) ? '' : `
+    <div class="edit-github" style="margin-top:50px">
+      <a href="${config.editOnGithubPrePath}${articleConfig.path}" ref="noreferrer noopener" target="_blank" >在 GitHub 上编辑本页</a>
+    </div>
   `
 
   let htmlStr = `
@@ -80,7 +86,8 @@ function render(config, globalScript, payload) {
             ${h1Title || ''}
             ${articleTop}
             ${h1Title ? articleHtml.replace(h1Title, '') : articleHtml}
-            
+            ${editOnGithub}
+            <!-- 评论系统上方 html - 广告 html -->
             ${(!articleConfig.isCategory && config.commentTopHtml) ? config.commentTopHtml : ''}
             <!-- 评论系统占位 -->
             <div id="commentDiv"></div>

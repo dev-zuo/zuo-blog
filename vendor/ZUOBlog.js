@@ -153,6 +153,8 @@ class ZUOBlog {
         this.invalidConfigFileList.push(articlePath)
         return;
       }
+      // 去掉前面的 . "./src/notes/2021/1/设置允许跨域的响应头后，为什么还是不能跨域.md"
+      articleConfig.path = articlePath.substring(1)
 
       // {
       //   content: '\n# title\nwoshineirong ',

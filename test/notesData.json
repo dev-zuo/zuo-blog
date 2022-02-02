@@ -45,6 +45,7 @@
         "description": "在 post 请求中，设置了允许跨域的响应头，且考虑了 preflight 预检请求，但为什么还是报不能跨域的错误呢？下面来看看下面的例子，POST 请求中设置了允许跨域、允许预检的响应头。我们需要深入了解预检请求的过程，预检请求会先发送一个 OPTIONS 的请求去测试服务端是否允许跨域。这个时候我们需要注意，我们也需要处理对应接口的 OPTIONS 请求，上面只处理了接口 URL 的 POST 请求，并没有处理 OPTIONS 请求，可以使用 router.use(url, func) 或者加一个 router.options 请求处理",
         "keywords": "跨域,cors,请求预检",
         "category": "JavaScript",
+        "path": "/src/notes/2021/1/设置允许跨域的响应头后，为什么还是不能跨域.md",
         "year": "2021",
         "month": "1"
       }
@@ -74,6 +75,7 @@
         "description": "在 windows 系统中，如果是第一次拉取代码，而且是使用的 http 方式，涉及到登录的时候，会要求输入 git 相关账号密码，如果账号密码不小心输入错误。后面每次 git clone 都会提示 auth 失败。这时我们可以在 **控制面板 - 用户账户 - 凭据管理器** 里修改对应的密码",
         "keywords": "git clone error,git clone auth fail",
         "category": "运维部署与版本控制",
+        "path": "/src/notes/2021/4/git clone 输错了密码，怎么重新输入或修改密码.md",
         "year": "2021",
         "month": "4"
       }
@@ -84,6 +86,7 @@
     "title": "左小白的技术日常",
     "isAddBaiduTongji": true,
     "baiduTongjiId": "183281668cc3440449274d1f93c04de6",
+    "editOnGithubPrePath": "https://github.com/zuoxiaobai/zuo11.com/edit/v2.0.2",
     "indexConfig": {
       "author": "guoqzuo",
       "description": "左小白的技术日常，主要记录和分享web前端领域相关的理解、总结、观点。偶尔会进行一些扩展：比如网站建设、服务器运维、后台数据库等",
