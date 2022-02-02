@@ -82,8 +82,9 @@ class ZUOBlog {
     // 将当前src目录的images文件copy到dist目录
     FSExtend.copyFolder('./src/images', './dist/images')
 
-    // 将当前 extraRootFiles 目录的文件copy到dist/blog目录
-    FSExtend.copyFolder('./extraRootFiles', './dist/blog')
+    // 将当前 extraRootFiles 目录的文件copy到dist/目录
+    // extraRootFiles 目录用于存放需要放到网站根目录的内容，比如 baidu、google 校验文件等
+    FSExtend.copyFolder('./extraRootFiles', './dist/')
   }
 
   // 开始遍历notes目录
