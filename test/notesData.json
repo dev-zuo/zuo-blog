@@ -8,6 +8,15 @@
         "description": "在 post 请求中，设置了允许跨域的响应头，且考虑了 preflight 预检请求，但为什么还是报不能跨域的错误呢？下面来看看下面的例子，POST 请求中设置了允许跨域、允许预检的响应头。我们需要深入了解预检请求的过程，预检请求会先发送一个 OPTIONS 的请求去测试服务端是否允许跨域。这个时候我们需要注意，我们也需要处理对应接口的 OPTIONS 请求，上面只处理了接口 URL 的 POST 请求，并没有处理 OPTIONS 请求，可以使用 router.use(url, func) 或者加一个 router.options 请求处理",
         "keywords": "跨域,cors,请求预检"
       }
+    ],
+    "运维部署与版本控制": [
+      {
+        "title": "git clone 输错了密码，怎么重新输入或修改密码",
+        "href": "2021/4/git_clone_pw_error.html",
+        "time": "2021/04/03",
+        "description": "在 windows 系统中，如果是第一次拉取代码，而且是使用的 http 方式，涉及到登录的时候，会要求输入 git 相关账号密码，如果账号密码不小心输入错误。后面每次 git clone 都会提示 auth 失败。这时我们可以在 **控制面板 - 用户账户 - 凭据管理器** 里修改对应的密码",
+        "keywords": "git clone error,git clone auth fail"
+      }
     ]
   },
   "fileData": [
@@ -29,7 +38,7 @@
         }
       ],
       "config": {
-        "source": "设置允许跨域的响应头后，为什么还是不能跨域.md",
+        "title": "设置允许跨域的响应头后，为什么还是不能跨域",
         "staticFileName": "cors-allow.html",
         "author": "guoqzuo",
         "createDate": "2021/01/12",
@@ -39,9 +48,38 @@
         "year": "2021",
         "month": "1"
       }
+    },
+    {
+      "htmlStr": "<h1 id=\"git-clone-输错了密码，怎么重新输入或修改密码\">git clone 输错了密码，怎么重新输入或修改密码</h1>\n<p>在 windows 系统中，如果是第一次拉取代码，而且是使用的 http 方式，涉及到登录的时候，会要求输入 git 相关账号密码，如果账号密码不小心输入错误。后面每次 git clone 都会提示 auth 失败。</p>\n<p>这时我们可以在 <strong>控制面板 - 用户账户 - 凭据管理器</strong> 里修改对应的密码</p>\n",
+      "outline": [
+        {
+          "type": "heading",
+          "raw": "# git clone 输错了密码，怎么重新输入或修改密码\n\n",
+          "depth": 1,
+          "text": "git clone 输错了密码，怎么重新输入或修改密码",
+          "tokens": [
+            {
+              "type": "text",
+              "raw": "git clone 输错了密码，怎么重新输入或修改密码",
+              "text": "git clone 输错了密码，怎么重新输入或修改密码"
+            }
+          ]
+        }
+      ],
+      "config": {
+        "title": "git clone 输错了密码，怎么重新输入或修改密码",
+        "staticFileName": "git_clone_pw_error.html",
+        "author": "guoqzuo",
+        "createDate": "2021/04/03",
+        "description": "在 windows 系统中，如果是第一次拉取代码，而且是使用的 http 方式，涉及到登录的时候，会要求输入 git 相关账号密码，如果账号密码不小心输入错误。后面每次 git clone 都会提示 auth 失败。这时我们可以在 **控制面板 - 用户账户 - 凭据管理器** 里修改对应的密码",
+        "keywords": "git clone error,git clone auth fail",
+        "category": "运维部署与版本控制",
+        "year": "2021",
+        "month": "4"
+      }
     }
   ],
-  "count": 1,
+  "count": 2,
   "config": {
     "title": "左小白的技术日常",
     "isAddBaiduTongji": true,
@@ -106,5 +144,14 @@
     "articleTopHtml": "<ins class='adsbygoogle' style='display:block; text-align:center;' data-ad-layout='in-article' data-ad-format='fluid' data-ad-client='ca-pub-9527676606416641' data-ad-slot='5125924359'></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script>",
     "_isGlobalJsFileExists": false,
     "_isGlobalCssFileExists": false
-  }
+  },
+  "validFileList": [
+    "./src/notes/2021/1/设置允许跨域的响应头后，为什么还是不能跨域.md",
+    "./src/notes/2021/4/git clone 输错了密码，怎么重新输入或修改密码.md"
+  ],
+  "invalidConfigFileList": [],
+  "invalidNameFileList": [
+    "./src/notes/2021/1/.DS_Store",
+    "./src/notes/2021/4/.DS_Store"
+  ]
 }
