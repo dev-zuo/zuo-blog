@@ -20,53 +20,60 @@ class ZUOBlog {
     this.category = {} // 分类信息
     this.fileData = [] // 处理后的文章数据，每条数据包含fileStr, htmlStr, outline, config
     this.config = {} // 配置文件
+    this.curBranchName = '' // 当前 git 分支名称
   }
 
   // 获取元数据
   getNotesData() {
-    try {
-      // 删除原来的dist目录，新建dist目录
-      this._initFolder()
+    return new Promise(async (resovle, reject) => {
+      try {
+        // 删除原来的dist目录，新建dist目录
+        this._initFolder()
 
-      // 开始遍历notes目录，并生成数据
-      this._startErgodicNotes()
+        const git = require('simple-git')('.');
+        const status = await git.status()
+        this.curBranchName = status.current //  current: 'v1.0.0', tracking: 'origin/v1.0.0',
 
-      // 生成基础数据OK，测试用，看数据是否异常
-      // console.log(JSON.stringify(this.fileData, null, 2))
-      // console.log(JSON.stringify(this.category, null, 2))
-      // console.log(this.count)
+        // 开始遍历notes目录，并生成数据
+        this._startErgodicNotes()
 
-      // 判断src目录下是否有global.js，如果有，在config里加入标记，后面生成页面时有标记就
-      let isGlobalJsFileExists = fs.existsSync(this.globalJsPath)
-      let isGlobalCssFileExists = fs.existsSync(this.globalCssPath)
-      console.log('global.js 存在标记：', isGlobalJsFileExists)
-      console.log('global.css 存在标记：', isGlobalCssFileExists)
+        // 生成基础数据OK，测试用，看数据是否异常
+        // console.log(JSON.stringify(this.fileData, null, 2))
+        // console.log(JSON.stringify(this.category, null, 2))
+        // console.log(this.count)
 
-      this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
-      this.config._isGlobalJsFileExists = isGlobalJsFileExists
-      this.config._isGlobalCssFileExists = isGlobalCssFileExists
+        // 判断src目录下是否有global.js，如果有，在config里加入标记，后面生成页面时有标记就
+        let isGlobalJsFileExists = fs.existsSync(this.globalJsPath)
+        let isGlobalCssFileExists = fs.existsSync(this.globalCssPath)
+        console.log('global.js 存在标记：', isGlobalJsFileExists)
+        console.log('global.css 存在标记：', isGlobalCssFileExists)
 
-      // 引入head、body代码片段
-      if (fs.existsSync(this.headFragment)) {
-        this.config.headFragment = fs.readFileSync(this.headFragment).toString()
+        this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
+        this.config._isGlobalJsFileExists = isGlobalJsFileExists
+        this.config._isGlobalCssFileExists = isGlobalCssFileExists
+
+        // 引入head、body代码片段
+        if (fs.existsSync(this.headFragment)) {
+          this.config.headFragment = fs.readFileSync(this.headFragment).toString()
+        }
+        if (fs.existsSync(this.bodyFragment)) {
+          this.config.bodyFragment = fs.readFileSync(this.bodyFragment).toString()
+        }
+
+
+        let { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList } = this
+        const notesData = { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList }
+
+        fs.writeFileSync('notesData.json', JSON.stringify(notesData, null, 2), (err) => {
+          console.log(err)
+        })
+        console.log('第一步: 基础数据生成成功 [OK]')
+        resovle(notesData)
+      } catch (e) {
+        console.error(e)
+        reject({})
       }
-      if (fs.existsSync(this.bodyFragment)) {
-        this.config.bodyFragment = fs.readFileSync(this.bodyFragment).toString()
-      }
-
-
-      let { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList } = this
-      const notesData = { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList }
-      
-      fs.writeFileSync('notesData.json', JSON.stringify(notesData, null, 2), (err) => {
-        console.log(err)
-      })
-      console.log('第一步: 基础数据生成成功 [OK]')
-      return notesData
-    } catch (e) {
-      console.error(e)
-      return {}
-    }
+    })
   }
 
   /**
@@ -153,8 +160,10 @@ class ZUOBlog {
         this.invalidConfigFileList.push(articlePath)
         return;
       }
+
       // 去掉前面的 . "./src/notes/2021/1/设置允许跨域的响应头后，为什么还是不能跨域.md"
-      articleConfig.path = articlePath.substring(1)
+      // 获取当前分支名称 + 处理后的字符串
+      articleConfig.path = `/${this.curBranchName}${articlePath.substring(1)}`
 
       // {
       //   content: '\n# title\nwoshineirong ',
@@ -184,7 +193,7 @@ class ZUOBlog {
       this.validFileList.push(articlePath)
       this.count++ // 文件数量+1
     } catch (e) {
-      console.log(e.messge)
+      console.log(e, e.messge)
     }
   }
 

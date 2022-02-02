@@ -31,7 +31,8 @@
     "gray-matter": "^4.0.3",
     "koa": "^2.13.4",
     "koa-static": "^5.0.0",
-    "marked": "^4.0.10"
+    "marked": "^4.0.10",
+    "simple-git": "^3.1.1"
   },
   "devDependencies": {
     "vuepress": "^1.7.1"
