@@ -1,6 +1,6 @@
 {
   "name": "zuo-blog",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a staic blog system like hexo",
   "main": "index.js",
   "scripts": {

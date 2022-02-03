@@ -28,6 +28,12 @@ const init = async () => {
     const defaultDraft = new DefaultDraft()
     defaultDraft.init(notesData) // 根据默认主题生成静态博客系统
 
+    // zuoblog init --disable-dev-server
+    if (process.argv[2] === '--disable-dev-server') {
+      // 如果 disable dev server， 部署构建时需要
+      return
+    }
+
     // 增强 - dev server
     const DevServer = require('../vendor/devServer/index')
     const devServer = new DevServer()
