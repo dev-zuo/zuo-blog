@@ -73,7 +73,11 @@ class FSExtend {
     }
 
     if (fs.existsSync(copiedPath)) {
-        createDir(resultPath)
+        // 如果 resultPath 存在，就不再创建
+        if (!fs.existsSync(resultPath)) {
+            createDir(resultPath)
+        }
+
         /**
          * @des 方式一：利用子进程操作命令行方式
          */

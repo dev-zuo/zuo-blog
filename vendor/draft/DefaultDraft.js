@@ -15,8 +15,6 @@ class DefaultDraft {
 
   // 根据元数据，生成静态博客系统
   init(notesData) {
-    fs.writeFileSync('notesData.json', '{}')
-    fs.writeFileSync('notesData.json', JSON.stringify(notesData, null, 2))
     Object.assign(this, notesData)
     console.log('第二步: 开始渲染模板...')
     try {
@@ -192,7 +190,7 @@ class DefaultDraft {
     // 根据大纲数据(JSON)生成侧边栏html
     let asideHtml = this._getAsideHtml(outline) 
     let articleConfig = {
-      "source": '文章分类.md',
+      "title": '文章分类',
       "staticFileName": "category.html",
       "category": "分类",
       "author": this.config.indexConfig.author,

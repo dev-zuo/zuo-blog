@@ -14,9 +14,18 @@ npm install zuo-blog -g
 
 ## 目录结构要求
 按照如下目录结构，写对应的md文章
+
+- break updates: 全局配置文件 _config.json => config.json
+- feat: 将当前 extraRootFiles 目录的文件copy到dist/blog目录
+- feat: 新增 dev server
+- 每次修改调试都要 sudo npm link 再到 zuo11.com 仓库看结果，很慢，新建 test 目录，弄一些测试 demo，方便调试
+- v0.7.0 => v1.0.0 front-matter 数据转换处理 node covert.js, [covert.js下载](https://github.com/zuoxiaobai/zuo11.com/blob/v2.0.2/covert.js)
+- 增加 edit on github 功能 src/config.json 全局配置 "editOnGithubPrePath": "https://github.com/zuoxiaobai/zuo11.com/edit", 格式 "https://github.com/github用户名/仓库名/edit"
+- v1.0.1 增加 zuoblog init --disable-dev-server 参数，用于在自动化部署时跳过 devserver
+
 ```bash
 ├── src # 写博客文章的目录
-│   ├── _config.json # 全局配置文件
+│   ├── config.json # 全局配置文件
 │   ├── global.js # 全局js
 │   ├── global.css # 全局css 
 │   ├── images # 图片目录

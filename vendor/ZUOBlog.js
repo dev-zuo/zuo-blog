@@ -2,62 +2,78 @@
 const FSExtend = require('./utils/FSExtend')
 const fs = require('fs')
 const marked = require('marked')
+const matter = require('gray-matter')
 
 class ZUOBlog {
 
   constructor() {
     this.notesPath = './src/notes' // notes目录 
-    this.configPath = './src/_config.json'
+    this.configPath = './src/config.json'
     this.globalJsPath = './src/global.js'
     this.globalCssPath = './src/global.css'
     this.headFragment = './src/headFragment.html'
     this.bodyFragment = './src/bodyFragment.html'
-    this.count = 0 // md文件数量
+    this.count = 0 // 有效 md 文件数量
+    this.validFileList = []
+    this.invalidNameFileList = [] // 第一次过滤：无效名称 - 文件列表（. 开头或非 md文件）
+    this.invalidConfigFileList = [] // 第二次过滤：无效配置信息 - 文件列表（front matter 信息异常）
     this.category = {} // 分类信息
     this.fileData = [] // 处理后的文章数据，每条数据包含fileStr, htmlStr, outline, config
     this.config = {} // 配置文件
+    this.curBranchName = '' // 当前 git 分支名称
   }
 
   // 获取元数据
   getNotesData() {
-    try {
-      // 删除原来的dist目录，新建dist目录
-      this._initFolder()
+    return new Promise(async (resovle, reject) => {
+      try {
+        // 删除原来的dist目录，新建dist目录
+        this._initFolder()
 
-      // 开始遍历notes目录，并生成数据
-      this._startErgodicNotes()
+        const git = require('simple-git')('.');
+        const status = await git.status()
+        this.curBranchName = status.current //  current: 'v1.0.0', tracking: 'origin/v1.0.0',
 
-      // 生成基础数据OK，测试用，看数据是否异常
-      // console.log(JSON.stringify(this.fileData, null, 2))
-      // console.log(JSON.stringify(this.category, null, 2))
-      // console.log(this.count)
+        // 开始遍历notes目录，并生成数据
+        this._startErgodicNotes()
 
-      // 判断src目录下是否有global.js，如果有，在config里加入标记，后面生成页面时有标记就
-      let isGlobalJsFileExists = fs.existsSync(this.globalJsPath)
-      let isGlobalCssFileExists = fs.existsSync(this.globalCssPath)
-      console.log('global.js 存在标记：', isGlobalJsFileExists)
-      console.log('global.css 存在标记：', isGlobalCssFileExists)
+        // 生成基础数据OK，测试用，看数据是否异常
+        // console.log(JSON.stringify(this.fileData, null, 2))
+        // console.log(JSON.stringify(this.category, null, 2))
+        // console.log(this.count)
 
-      this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
-      this.config._isGlobalJsFileExists = isGlobalJsFileExists
-      this.config._isGlobalCssFileExists = isGlobalCssFileExists
+        // 判断src目录下是否有global.js，如果有，在config里加入标记，后面生成页面时有标记就
+        let isGlobalJsFileExists = fs.existsSync(this.globalJsPath)
+        let isGlobalCssFileExists = fs.existsSync(this.globalCssPath)
+        console.log('global.js 存在标记：', isGlobalJsFileExists)
+        console.log('global.css 存在标记：', isGlobalCssFileExists)
 
-      // 引入head、body代码片段
-      if (fs.existsSync(this.headFragment)) {
-        this.config.headFragment = fs.readFileSync(this.headFragment).toString()
+        this.config = JSON.parse(fs.readFileSync(this.configPath).toString())
+        this.config._isGlobalJsFileExists = isGlobalJsFileExists
+        this.config._isGlobalCssFileExists = isGlobalCssFileExists
+
+        // 引入head、body代码片段
+        if (fs.existsSync(this.headFragment)) {
+          this.config.headFragment = fs.readFileSync(this.headFragment).toString()
+        }
+        if (fs.existsSync(this.bodyFragment)) {
+          this.config.bodyFragment = fs.readFileSync(this.bodyFragment).toString()
+        }
+
+
+        let { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList } = this
+        const notesData = { category, fileData, count, config, validFileList, invalidConfigFileList, invalidNameFileList }
+
+        fs.writeFileSync('notesData.json', JSON.stringify(notesData, null, 2), (err) => {
+          console.log(err)
+        })
+        console.log('第一步: 基础数据生成成功 [OK]')
+        resovle(notesData)
+      } catch (e) {
+        console.error(e)
+        reject({})
       }
-      if (fs.existsSync(this.bodyFragment)) {
-        this.config.bodyFragment = fs.readFileSync(this.bodyFragment).toString()
-      }
-
-  
-      let {category, fileData, count, config} = this
-      console.log('第一步: 基础数据生成成功 [OK]')
-      return {category, fileData, count, config}
-    } catch(e) {
-      console.error(e)
-      return {}
-    }   
+    })
   }
 
   /**
@@ -68,60 +84,117 @@ class ZUOBlog {
     FSExtend.deleteFolder('./dist')
 
     // 新建dist目录，blog目录，类似于 mkdir -p dist/blog
-    fs.mkdirSync('./dist/blog', {recursive: true})
+    fs.mkdirSync('./dist/blog', { recursive: true })
 
     // 将当前src目录的images文件copy到dist目录
     FSExtend.copyFolder('./src/images', './dist/images')
+
+    // 将当前 extraRootFiles 目录的文件copy到dist/目录
+    // extraRootFiles 目录用于存放需要放到网站根目录的内容，比如 baidu、google 校验文件等
+    FSExtend.copyFolder('./extraRootFiles', './dist/')
   }
 
   // 开始遍历notes目录
   _startErgodicNotes() {
     // 遍历年份目录 ['2019', '2020' ]
-    fs.readdirSync(this.notesPath).forEach(year => { 
+    fs.readdirSync(this.notesPath).forEach(year => {
       if (year.startsWith('.')) return // 过滤掉隐藏文件
       const yearPath = `${this.notesPath}/${year}` // './src/notes/2019'
-      
+
       // 遍历该年份下月分目录[ '1', '2' ]
-      fs.readdirSync(yearPath).forEach(month => {  
+      fs.readdirSync(yearPath).forEach(async month => {
         if (month.startsWith('.')) return // 过滤掉隐藏文件
         const monthPath = `${yearPath}/${month}` // './src/notes/2019/1'
-        const monthCfgPath = `${monthPath}/_info.json` // 配置文件
 
-        // 如果配置文件存在
-        if (fs.existsSync(monthCfgPath)) {  
-          // if (year !== '2019') return  // 测试单个文件用
-          // 根据配置文件遍历md文件
-          JSON.parse(fs.readFileSync(monthCfgPath)).forEach(article => { 
-            const articlePath = `${monthPath}/${article.source}` // './src/notes/2019/1/xxx.md'
-            this._handlerMdFile(article, articlePath, year, month) 
+        // v0.7.0
+        // const monthCfgPath = `${monthPath}/_info.json` // 配置文件
+        // // 如果配置文件存在
+        // if (fs.existsSync(monthCfgPath)) {  
+        //   // if (year !== '2019') return  // 测试单个文件用
+        //   // 根据配置文件遍历md文件
+        //   JSON.parse(fs.readFileSync(monthCfgPath)).forEach(article => { 
+        //     const articlePath = `${monthPath}/${article.source}` // './src/notes/2019/1/xxx.md'
+        //     this._handlerMdFile(article, articlePath, year, month) 
+        //   })
+        // }
+
+        // v1.0.0
+        // 读取目录 src/notes/[year]/[month] 下的所有 md 文件
+        let files = fs.readdirSync(monthPath, {
+          withFileTypes: true // 不返回文件数组，返回文件 <fs.Dirent> 对象
+        })
+        // console.log(files);
+
+        if (files && Array.isArray(files)) {
+          files.forEach(async item => {
+            const articlePath = `${monthPath}/${item.name}` // './src/notes/2019/1/xxx.md'
+
+            // 隐藏文件不处理
+            if (item.name.startsWith('.') || !item.name.includes('.md')) {
+              console.log(`[Warn] ${articlePath} 不是 markdown 文件，不做处理`)
+              this.invalidNameFileList.push(articlePath)
+              return
+            }
+
+            this._handlerMdFile(articlePath, year, month)
           })
         }
+
       })
     })
   }
 
   // 处理md文件
-  _handlerMdFile(article, articlePath, year, month) {
-    // 读取文件内容，通过maked转换为html字符串
-    const fileStr = fs.readFileSync(articlePath).toString() 
-    let htmlStr = marked(fileStr)
-    let headers = marked.lexer(fileStr).filter(item => item.type === 'heading')
-    let outline = this._generateOutline(headers) // 根据文件内容生成大纲数据
-    // console.log(JSON.stringify(outline, null, 2))
+  async _handlerMdFile(articlePath, year, month) {
+    try {
+      let fileBuffer = fs.readFileSync(articlePath);
+      let fileText = fileBuffer.toString()
 
-    // 为了解耦 可扩展增加主题，先收集数据，然后根据主题统一生成文件文件
-    // generatorHtml(htmlStr, outline, `${year}/${month}`, article)
-    // 将文件数据存到 fileData
-    this.fileData.push({
-      // fileStr,
-      htmlStr,
-      outline,
-      config: { ...article, year, month }
-    })
+      // 读取 front matter 信息、支持 YAML/JSON
+      let res = matter(fileText)
+      let { data: articleConfig = {}, content } = res || {}
+      // TODO，如果配置中文件名重复怎么处理
+      // Enhance，没有设置静态文件名等，根据通用规则设置初始化文件信息
+      if (JSON.stringify(articleConfig) === '{}') {
+        console.log(`[Error]: ${articlePath} 缺少 front-matter 信息，请补充`)
+        this.invalidConfigFileList.push(articlePath)
+        return;
+      }
 
-    // 收集数据到cateory对象
-    this._handlerCategory(article, year, month)
-    this.count++ // 文件数量+1
+      // 去掉前面的 . "./src/notes/2021/1/设置允许跨域的响应头后，为什么还是不能跨域.md"
+      // 获取当前分支名称 + 处理后的字符串
+      articleConfig.path = `/${this.curBranchName}${articlePath.substring(1)}`
+
+      // {
+      //   content: '\n# title\nwoshineirong ',
+      //   data: { title: 'Blogging Like a Hacker', lang: 'en-US' },
+      //   isEmpty: false,
+      //   excerpt: ''
+      // }
+
+      let htmlStr = marked.parse(content)
+      let headers = marked.lexer(content).filter(item => item.type === 'heading')
+
+      // TODO 大纲优化
+      let outline = this._generateOutline(headers) // 根据文件内容生成大纲数据
+      // console.log(JSON.stringify(outline, null, 2))
+
+      // 为了解耦 可扩展增加主题，先收集数据，然后根据主题统一生成文件文件
+      // generatorHtml(htmlStr, outline, `${year}/${month}`, article)
+      // 将文件数据存到 fileData
+      this.fileData.push({
+        htmlStr,
+        outline,
+        config: { ...articleConfig, year, month }
+      })
+
+      // 收集数据到cateory对象
+      this._handlerCategory(articleConfig, year, month)
+      this.validFileList.push(articlePath)
+      this.count++ // 文件数量+1
+    } catch (e) {
+      console.log(e, e.messge)
+    }
   }
 
   /**
@@ -135,15 +208,21 @@ class ZUOBlog {
     let categoryName = article.category
     !this.category[categoryName] && (this.category[categoryName] = [])
 
-    // 2018/01/14  => 2018/1
-    let dateArr = article.createDate.split('/')
-    dateArr.pop() //['2018', '01']
-    dateArr[1] = Number(dateArr[1]) // ['2018', 1]
-    let dateStr = dateArr.join('/') // 2018/1
+    // // 2018/01/14  => 2018/1
+    // let dateArr = article.createDate.split('/')
+    // dateArr.pop() //['2018', '01']
+    // dateArr[1] = Number(dateArr[1]) // ['2018', 1]
+    // let dateStr = dateArr.join('/') // 2018/1
+
+    // 原先是根据 createDate 来确定路径，现在根据文件路径来确定 url
+    // 这样路径就定死了，createDate 仅用于页面显示创建日期
+    year = Number(year)
+    month = Number(month)
 
     this.category[categoryName].push({
-      title: article.source.split('.md')[0],
-      href: dateStr + '/' + article.staticFileName,
+      // title: article.source.split('.md')[0], // 原先从_info.json 取文件名，改为从 配置中取文件名
+      title: article.title,
+      href: `${year}/${month}/${article.staticFileName}`,
       time: article.createDate,
       description: article.description,
       keywords: article.keywords
@@ -178,7 +257,7 @@ class ZUOBlog {
             // 如果是3级+，遍历到最近一个层级的list
             let count = item.depth - 2
             target = tree.slice(-1)[0]
-            while(count--) {
+            while (count--) {
               target = target.children.slice(-1)[0]
             }
           }
@@ -186,10 +265,10 @@ class ZUOBlog {
           target.children.push(item)
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e)
       let text = '目录生成异常，请确保目录层级从H1到H6是正常顺序，对于没有H1或目录中间断层的情况需要修正'
-      return [ { text } ]
+      return [{ text }]
     }
     return tree
   }

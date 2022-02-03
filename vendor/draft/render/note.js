@@ -12,14 +12,14 @@
  * }
  */
 function render(config, globalScript, payload) {
-  let {title, footer} = config
+  let { title, footer } = config
   let { articleHtml, articleConfig, asideHtml, topRightLinkHtml } = payload
 
   // 分类的链接
   let categoryHref = '/blog/category.html#' + articleConfig.category.toLowerCase()
   articleConfig.isCategory && (categoryHref = '')
 
-  
+
   let h1StartIndex = articleHtml.indexOf('<h1 id="')
   let h1EndIndex = articleHtml.indexOf('</h1>')
   let h1Title = ''
@@ -43,6 +43,12 @@ function render(config, globalScript, payload) {
     ${config.articleTopHtml || ''}
   `
 
+  let editOnGithub = (!config.editOnGithubPrePath || !articleConfig.path) ? '' : `
+    <div class="edit-github" style="margin-top:50px">
+      <a href="${config.editOnGithubPrePath}${articleConfig.path}" ref="noreferrer noopener" target="_blank" >在 GitHub 上编辑本页</a>
+    </div>
+  `
+
   let htmlStr = `
     <!DOCTYPE html>
     <html lang="${config.lang || 'zh-CN'}">
@@ -56,7 +62,7 @@ function render(config, globalScript, payload) {
         <meta name="description" content="${articleConfig.description}">
         <meta name="keywords" content="${articleConfig.keywords}">
 
-        <title>${articleConfig.source.split('.md')[0]} - ${title}</title>
+        <title>${articleConfig.title} - ${title}</title>
         <link rel="shortcut icon" href="/images/favicon.ico">
         <link href="/lib/prismjs/prism_default.css" rel="stylesheet" />
         <link href="/lib/notes.css" rel="stylesheet" />
@@ -80,7 +86,8 @@ function render(config, globalScript, payload) {
             ${h1Title || ''}
             ${articleTop}
             ${h1Title ? articleHtml.replace(h1Title, '') : articleHtml}
-            
+            ${editOnGithub}
+            <!-- 评论系统上方 html - 广告 html -->
             ${(!articleConfig.isCategory && config.commentTopHtml) ? config.commentTopHtml : ''}
             <!-- 评论系统占位 -->
             <div id="commentDiv"></div>
